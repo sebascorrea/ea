@@ -1,0 +1,32 @@
+name: Publicar Docker
+
+on:
+  push:
+    branches:
+      - main  # O ajusta según tu rama principal
+
+jobs:
+  docker-build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/php-fpm/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}:latest
